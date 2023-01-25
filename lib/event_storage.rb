@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class EventSource
+class EventStorage
   attr_reader :event_trace
 
   def initialize

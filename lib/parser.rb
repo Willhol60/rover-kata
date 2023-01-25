@@ -3,7 +3,7 @@
 require 'optparse'
 
 class RoverParser
-  def self.parse(args)
+  def parse(args)
     options = {}
     opts = OptionParser.new do |opts|
       opts.on('-p', '--position POSITION', 'starting position for the rover e.g 37') do |position|
@@ -16,7 +16,7 @@ class RoverParser
         options[:obstacles] = obstacles
       end
       opts.on('-s', '--size SIZE', 'size of sphere e.g 8') do |size|
-        options[:size] = size
+        options[:size] = size.to_i
       end
       opts.on('-c', '--commands COMMANDS', 'commands for rover to move e.g LFLFLFLFU') do |commands|
         options[:commands] = commands

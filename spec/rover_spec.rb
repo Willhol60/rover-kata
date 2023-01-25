@@ -2,11 +2,16 @@
 
 require_relative "../lib/models/rover.rb"
 require_relative "../app/navigator.rb"
+require_relative "../lib/event_storage.rb"
+require_relative "../lib/models/grid.rb"
 
 RSpec.describe Rover do
-  subject(:run_navigator) { Navigator.new(rover).execute_commands }
+  subject(:run_navigator) { commands.each_char{navigator.execute_command(_1)} }
 
-  let(:rover) { described_class.new(args) }
+  let(:rover) { described_class.new(position: position, direction: direction, commands: commands) }
+  let(:grid) { Grid.new(obstacles: obstacles) }
+  let(:events) { EventStorage.new }
+  let(:navigator) { Navigator.new(rover, grid, events) }
 
   let(:position_x) { 3 }
   let(:position_y) { 7 }
@@ -18,11 +23,8 @@ RSpec.describe Rover do
   let(:obstacle_y) { 8 }
   let(:obstacles) { obstacle_x.to_s + obstacle_y.to_s }
 
-  let(:size) { 9 }
-
   let(:commands) { '' }
-  let(:args) { {position: position, direction: direction, obstacles: obstacles, size: size, commands: commands} }
-  
+
   describe 'when receiving only one command' do
     describe "when command is F" do
       let(:commands) { 'F' }
@@ -69,7 +71,7 @@ RSpec.describe Rover do
     describe 'when command is unknown' do
       let(:commands) { 'X' }
       it "throws exception" do
-        expect { run_navigator }.to raise_exception(InvalidCommand)
+        expect { run_navigator }.to raise_exception(RoverExceptions::InvalidCommand)
       end
     end
   end

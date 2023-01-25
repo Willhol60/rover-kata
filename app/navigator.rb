@@ -1,33 +1,41 @@
 # frozen_string_literal: true
 
+require 'pry'
+
 class Navigator
-  def initialize(rover)
+  def initialize(rover, grid, events)
     @rover = rover
+    @grid = grid
+    @events = events
   end
 
-  def execute_commands
-    @rover.commands.split('').each do |command|
-      execute_command(command)
-      break unless @rover.clear
-    end
+  def execute_command(command)
+    # get coordinates if moving (not turning), or turn and finish
+    get_coordinates(command) # to be renamed
+    # go to decision making entity
+      # check for obstacles
+      # check for boundaries
+    # return decision of whether to move or not
+    # make move (or not)
   end
-
+  
   private
   
-  def execute_command(command)
+  def get_coordinates(command)
     downcased = command.downcase
-
-    if %w(f b).include? downcased
+  
+    case downcased
+    when 'f', 'b'
       move(@rover.direction_value, downcased)
-    elsif %w(l r).include? downcased
+      @events.store_event(command)
+    when 'l', 'r'
       turn(downcased)
-    elsif downcased == 'u'
+      @events.store_event(command)
+    when 'u'
       undo_last_move
     else
-      raise InvalidCommand.new
+      raise RoverExceptions::InvalidCommand.new("#{command} is an invalid command, please put one of [F, B, L, R, U]")
     end
-
-    @rover.events.store_event(command) unless downcased == 'u'
   end
 
   def move(direction_value, movement)
@@ -59,30 +67,44 @@ class Navigator
   end
 
   def check_for_boundaries
-    if @rover.position.x > @rover.size
+    if @rover.position.x > @grid.size
       @rover.position.x = 0
     elsif @rover.position.x < 0
-      @rover.position.x = @rover.size
-    elsif @rover.position.y > @rover.size
+      @rover.position.x = @grid.size
+    elsif @rover.position.y > @grid.size
       @rover.position.y = 0
     elsif @rover.position.y < 0
-      @rover.position.y = @rover.size
+      @rover.position.y = @grid.size
     end
   end
 
-  def check_for_obstacles
-    return unless @rover.obstacles
+  require 'set'
 
-    @rover.obstacles.each do |obstacle|
+  def check_for_obstacles
+    return unless @grid.obstacles
+
+    # obstacles_set = Set.new
+
+    # @grid.obstacles.each do |obstacle|
+    #   obstacles_set << obstacle.values
+    # end
+
+    # if obstacles_set.include? @rover.position # proposed position to be passed as param instead of @rover.position
+    #     @rover.set_clear_false
+    #     undo_last_move
+    # end
+    @grid.obstacles.each do |obstacle|
       if obstacle.x == @rover.position.x && obstacle.y == @rover.position.y
-        @rover.clear = false
+        @rover.set_clear_false
         undo_last_move
       end
     end
   end
 
   def undo_last_move
-    last_command = @rover.events.event_trace.pop.downcase
+    last_command = @events.event_trace.pop.downcase
+    # make it possible to go back any number of commands with a slider
+    # don't use pop, use size of array minus x
 
     case last_command
     when 'f'
