@@ -34,5 +34,3 @@ rspec
 NEXT STEPS
 - validators for user input
 - allow for coordinates to be double digit
-- clean up 'check_for_boundaries' method in navigator.rb
-

@@ -122,7 +122,7 @@ RSpec.describe Rover do
   describe "when the rover is given the undo command" do
     let(:commands) { 'FFU' }
     it "reverses the most recent command" do
-      expected_position_y = position_y.to_i + 2 - 1
+      expected_position_y = position_y.to_i + 1
       run_navigator
       expect(rover.position.y).to eq expected_position_y
     end
